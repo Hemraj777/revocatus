@@ -1,11 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>revocatus</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Revocatus</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .bookmark-btn {
+            display: inline-block;
+            padding: 14px 28px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+            cursor: move;
+        }
+        ol {
+            text-align: left;
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+    </style>
 </head>
 <body>
-  <h1>revocatus</h1>
+
+<div class="container">
+    <h2>Revocatus Installer</h2>
+    <p>The easiest way to clean up your interaction history. No apps or setups required.</p>
+    
+    <!-- This anchor tag holds the entire javascript execution string -->
+    <a class="bookmark-btn" href="javascript:(async function(){console.log('Revocatus Engine Activated...');alert('Revocatus Engine Activated! Stay on this tab while it processes.');const wait=(ms)=>new Promise(resolve=>setTimeout(resolve,ms));let running=true;while(running){let items=document.querySelectorAll('div[aria-label=\x22Action options\x22], div[data-sigil=\x22touchable\x22]');if(items.length===0){console.log('No interactions visible. Scrolling...');window.scrollBy(0,window.innerHeight);await wait(3000);items=document.querySelectorAll('div[aria-label=\x22Action options\x22], div[data-sigil=\x22touchable\x22]');if(items.length===0){alert('Revocatus: Stream clear!');running=false;break;}continue;}console.log(`Processing ${items.length} elements...`);items[0].click();await wait(1500);let options=Array.from(document.querySelectorAll('span, div, a'));let targetAction=options.find(el=>el.textContent.includes('Unlike')||el.textContent.includes('Remove reaction'));if(targetAction){targetAction.click();console.log('[SUCCESS] Cleared.');await wait(2500);}else{console.log('[SKIPPED] Clicking away.');document.body.click();await wait(1000);}}})();">
+        Long-Press to Bookmark Revocatus
+    </a>
+
+    <h3>How to use on Mobile:</h3>
+    <ol>
+        <li><strong>Long-press</strong> the blue button above and select <strong>"Bookmark link"</strong>.</li>
+        <li>Open Facebook in this browser and go to your <strong>Activity Log -> Likes and Reactions</strong>.</li>
+        <li>Open your browser settings menu, go to <strong>Bookmarks</strong>, and tap <strong>Revocatus</strong> to start cleaning!</li>
+    </ol>
+</div>
+
 </body>
 </html>
