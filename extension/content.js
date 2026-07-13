@@ -8,9 +8,10 @@ function isDesktop() {
 }
 
 function isOnActivityLog() {
-  return location.pathname.includes('allactivity') ||
-         location.pathname.includes('/me/') ||
-         document.querySelector('[aria-label="Action options"]')
+  let url = location.href.toLowerCase()
+  return url.includes('allactivity') ||
+         url.includes('activity_log') ||
+         url.includes('/me/')
 }
 
 function findMenus() {
@@ -22,12 +23,11 @@ function findMenus() {
     })
   }
   let selectors = [
-    'div[aria-label="Action options"]',
-    'a[role="button"] i',
-    'div[data-sigil*="touchable"]',
+    '[aria-label="Action options"]',
+    '[data-sigil*="touchable"]',
+    '[data-sigil*="flyout"]',
     'i[class*="sp_"]',
-    'div[data-sigil*="flyout"]',
-    '[aria-label="Action options"]'
+    'a[role="button"] i'
   ]
   for (let sel of selectors) {
     let items = document.querySelectorAll(sel)
@@ -85,11 +85,16 @@ function sleep(ms) {
   return new Promise(r => setTimeout(r, ms))
 }
 
+function send(msg) {
+  try { chrome.runtime.sendMessage(msg) } catch (e) {}
+}
+
 async function startCleaning() {
   running = true
   abortFlag = false
   cleaned = 0
   idleCount = 0
+  send({ type: 'progress', count: 0 })
 
   while (running && !abortFlag) {
     let processed = await processPage()
@@ -100,40 +105,29 @@ async function startCleaning() {
       idleCount++
       if (idleCount > 20) {
         running = false
-        chrome.runtime.sendMessage({
-          type: 'done',
-          count: cleaned,
-          reason: 'No more items found'
-        })
+        send({ type: 'done', count: cleaned, reason: 'No more items found' })
         break
       }
       scrollBy(0, innerHeight)
       await sleep(3000)
     }
-
-    chrome.runtime.sendMessage({
-      type: 'progress',
-      count: cleaned
-    })
+    send({ type: 'progress', count: cleaned })
   }
 
   if (abortFlag || !running) {
-    chrome.runtime.sendMessage({
-      type: 'stopped',
-      count: cleaned
-    })
+    send({ type: 'stopped', count: cleaned })
   }
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'start') {
     if (!isOnActivityLog()) {
-      sendResponse({ ok: false, error: 'Go to Facebook Activity Log first' })
-      return
+      sendResponse({ ok: false, error: 'Not on Activity Log page. Go to:\n\nFacebook > Menu > Settings > Activity Log > Likes and Reactions' })
+      return true
     }
     if (running) {
       sendResponse({ ok: false, error: 'Already running' })
-      return
+      return true
     }
     startCleaning()
     sendResponse({ ok: true })
@@ -149,11 +143,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       desktop: isDesktop()
     })
   }
+  return true
 })
 
-// Send status on connect
-chrome.runtime.sendMessage({
-  type: 'ready',
-  onPage: isOnActivityLog(),
-  desktop: isDesktop()
-})
+try { chrome.runtime.sendMessage({ type: 'ready' }) } catch (e) {}

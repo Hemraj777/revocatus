@@ -4,6 +4,7 @@ const modeText = document.getElementById('modeText')
 const countDisplay = document.getElementById('countDisplay')
 const actionBtn = document.getElementById('actionBtn')
 const infoText = document.getElementById('infoText')
+const urlText = document.getElementById('urlText')
 
 let currentTab = null
 let state = { running: false, cleaned: 0, onPage: false, desktop: false }
@@ -26,13 +27,13 @@ function updateUI() {
     actionBtn.className = 'btn-start'
     actionBtn.disabled = !state.onPage
     infoText.textContent = state.onPage
-      ? 'Click Start to remove likes/reactions on this page.'
-      : 'Go to Facebook > Activity Log > Likes and Reactions, then open this popup.'
+      ? 'Tap Start to remove likes/reactions.'
+      : 'Go to Facebook Activity Log (Likes and Reactions), then tap Refresh.'
   }
 
   pageText.innerHTML = state.onPage
-    ? '<span class="badge ok">On Activity Log</span>'
-    : '<span class="badge warn">Wrong Page</span>'
+    ? '<span class="badge ok">Activity Log Detected</span>'
+    : '<span class="badge warn">Not Activity Log</span>'
 
   modeText.textContent = state.desktop ? 'Desktop' : 'Mobile'
   countDisplay.textContent = state.cleaned
@@ -45,6 +46,7 @@ function sendToTab(msg) {
 
 function queryStatus() {
   if (!currentTab) return
+  urlText.textContent = currentTab.url || ''
   chrome.tabs.sendMessage(currentTab.id, { type: 'status' })
     .then(res => {
       if (res) {
@@ -74,6 +76,10 @@ actionBtn.addEventListener('click', () => {
   }
 })
 
+document.getElementById('refreshBtn').addEventListener('click', () => {
+  queryStatus()
+})
+
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'progress' || msg.type === 'done' || msg.type === 'stopped') {
     state.cleaned = msg.count || 0
@@ -90,6 +96,7 @@ async function init() {
     queryStatus()
   } else {
     state.onPage = false
+    urlText.textContent = currentTab?.url || 'No page detected'
     updateUI()
   }
 }
