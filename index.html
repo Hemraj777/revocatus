@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Get Revocatus</title>
+    <title>Revocatus - Facebook Reaction Cleaner</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -20,7 +20,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        .bookmark-btn {
+        .btn {
             display: inline-block;
             padding: 14px 28px;
             background-color: #007bff;
@@ -29,36 +29,45 @@
             border-radius: 50px;
             font-weight: bold;
             font-size: 18px;
-            margin: 20px 0;
+            margin: 10px 0;
             box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
-            cursor: move;
         }
-        ol {
-            text-align: left;
-            padding-left: 20px;
-            line-height: 1.6;
-        }
+        .btn-success { background-color: #28a745; box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3); }
+        .btn-secondary { background-color: #6c757d; box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3); font-size: 14px; }
+        ol { text-align: left; padding-left: 20px; line-height: 1.6; }
+        .section { margin: 24px 0; padding: 16px; background: #f8f9fa; border-radius: 8px; }
+        .section h3 { margin-top: 0; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: #e3f2fd; color: #1565c0; }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <h2>Revocatus Installer</h2>
-    <p>The easiest way to clean up your interaction history. No apps or setups required.</p>
-    
-    <!-- This anchor tag holds the entire javascript execution string -->
-    <a class="bookmark-btn" href="javascript:(async function(){alert('Revocatus running... check console (3-dot menu > inspect > console).');const w=ms=>new Promise(r=>setTimeout(r,ms));let c=0,idle=0;const isDesktop=!!document.querySelector('[aria-label=\x22Action options\x22]');const isMobile=location.hostname.includes('m.facebook');let sel=isDesktop?'[aria-label=\x22Action options\x22]':'[data-sigil*=\x22flyout\x22],[data-sigil*=\x22touchable\x22],i[class*=\x22sp_\x22]';console.log('Mode: '+(isDesktop?'DESKTOP':'MOBILE')+' Selector: '+sel);while(true){let items=Array.from(document.querySelectorAll(sel)).filter(e=>{let r=e.getBoundingClientRect();return r.width>0&&r.height>0&&r.top<innerHeight&&r.bottom>20;});if(isMobile&&!items.length){items=Array.from(document.querySelectorAll('span,div,a')).filter(e=>{let t=e.textContent.trim().toLowerCase();return(t==='unlike'||t==='remove reaction')&&e.offsetHeight>0;});if(items.length){console.log('Direct Unlike found!');items[0].click();c++;await w(2000);continue;}}if(!items.length){idle++;if(idle>15){alert('Done! Cleaned '+c);break;}scrollBy(0,innerHeight);await w(3000);continue;}idle=0;console.log('Clicking menu...');items[0].click();await w(2000);let t=Array.from(document.querySelectorAll('span,div,a,[role=\x22menuitem\x22]')).find(e=>{let x=e.textContent.trim().toLowerCase();return x==='unlike'||x==='remove reaction'||(x.includes('unlike')&&!x.includes('unliked'));});if(t){t.click();c++;console.log('✓'+c);await w(2500);}else{document.body.click();await w(800);scrollBy(0,20);}}})();">
-        Long-Press to Bookmark Revocatus
-    </a>
+    <h2>Revocatus</h2>
+    <p>Clean up your Facebook likes, reactions, and interactions.</p>
 
-    <h3>How to use on Mobile Chrome:</h3>
-    <ol>
-        <li><strong>Long-press</strong> the blue button above and tap <strong>"Copy link address"</strong>.</li>
-        <li>Tap the browser's 3-dot menu and hit the <strong>Star (⭐) icon</strong> to bookmark this page.</li>
-        <li>Tap <strong>Edit</strong> at the bottom of your screen, name it <strong>Revocatus</strong>, clear the URL box, and <strong>paste</strong> what you copied.</li>
-        <li>Now, go to Facebook <strong>Activity Log -> Likes and Reactions</strong>, open your Bookmarks, and tap <strong>Revocatus</strong>!</li>
-    </ol>
+    <div class="section">
+        <h3><span class="badge">Recommended</span> Browser Extension</h3>
+        <p>Works on <strong>Desktop Chrome</strong> and <strong>Android</strong> (Kiwi Browser / Firefox).</p>
+        <a class="btn btn-success" href="https://github.com/Hemraj777/revocatus/archive/refs/heads/main.zip">Download Extension</a>
+        <ol>
+            <li>Download and <strong>unzip</strong> the file.</li>
+            <li><strong>Desktop Chrome:</strong> Go to <code>chrome://extensions</code>, enable <strong>Developer mode</strong>, click <strong>Load unpacked</strong>, select the <code>extension</code> folder.</li>
+            <li><strong>Android (Kiwi):</strong> Go to <code>kiwi://extensions</code>, enable Developer mode, load unpacked.</li>
+            <li>Go to Facebook <strong>Activity Log → Likes and Reactions</strong>, click the Revocatus icon, then <strong>Start</strong>.</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <h3>Bookmarklet (Alternative)</h3>
+        <p>No installation needed — works in any browser.</p>
+        <a class="btn btn-secondary" href="javascript:(async function(){alert('Revocatus running...');const w=ms=>new Promise(r=>setTimeout(r,ms));let c=0,idle=0;const isD=!!document.querySelector('[aria-label=\x22Action options\x22]');let sel=isD?'[aria-label=\x22Action options\x22]':'[data-sigil*=\x22flyout\x22],[data-sigil*=\x22touchable\x22],i[class*=\x22sp_\x22]';while(true){let items=Array.from(document.querySelectorAll(sel)).filter(e=>{let r=e.getBoundingClientRect();return r.width>0&&r.height>0&&r.top<innerHeight&&r.bottom>20;});if(isD&&!items.length){let h=scrollY;scrollBy(0,innerHeight);await w(2000);if(scrollY===h){alert('Done! Cleaned '+c);break}continue}if(!items.length){idle++;if(idle>15){alert('Done! Cleaned '+c);break}scrollBy(0,innerHeight);await w(3000);continue}idle=0;items[0].click();await w(2000);let t=Array.from(document.querySelectorAll('span,div,a,[role=\x22menuitem\x22]')).find(e=>{let x=e.textContent.trim().toLowerCase();return x==='unlike'||x==='remove reaction'||(x.includes('unlike')&&!x.includes('unliked'));});if(t){t.click();c++;await w(2500)}else{document.body.click();await w(800);scrollBy(0,20);}}})();">Long-press to bookmark</a>
+        <ol>
+            <li><strong>Long-press</strong> the button above → <strong>Copy link address</strong>.</li>
+            <li>Bookmark this page, then <strong>Edit</strong> the bookmark and paste the copied URL.</li>
+            <li>Go to Facebook <strong>Activity Log → Likes and Reactions</strong>, tap the bookmark.</li>
+            <li>For best results, enable <strong>Desktop site</strong> in Chrome menu first.</li>
+        </ol>
+    </div>
 </div>
-
 </body>
 </html>

@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Revocatus - Facebook Reaction Cleaner",
+  "version": "1.0.0",
+  "description": "Remove Facebook likes and reactions in bulk from your Activity Log.",
+  "icons": {
+    "48": "icon.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Revocatus"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.facebook.com/*",
+        "*://*.m.facebook.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "host_permissions": [
+    "*://*.facebook.com/*",
+    "*://*.m.facebook.com/*"
+  ],
+  "permissions": [
+    "storage",
+    "activeTab"
+  ]
+}
