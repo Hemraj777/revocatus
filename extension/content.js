@@ -8,10 +8,7 @@ function isDesktop() {
 }
 
 function isOnActivityLog() {
-  let url = location.href.toLowerCase()
-  return url.includes('allactivity') ||
-         url.includes('activity_log') ||
-         url.includes('/me/')
+  return true
 }
 
 function findMenus() {
@@ -121,10 +118,6 @@ async function startCleaning() {
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'start') {
-    if (!isOnActivityLog()) {
-      sendResponse({ ok: false, error: 'Not on Activity Log page. Go to:\n\nFacebook > Menu > Settings > Activity Log > Likes and Reactions' })
-      return true
-    }
     if (running) {
       sendResponse({ ok: false, error: 'Already running' })
       return true
