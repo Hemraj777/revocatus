@@ -7,10 +7,6 @@ function isDesktop() {
   return !!document.querySelector('[aria-label="Action options"]')
 }
 
-function isOnActivityLog() {
-  return true
-}
-
 function findMenus() {
   if (isDesktop()) {
     let items = document.querySelectorAll('[aria-label="Action options"]')

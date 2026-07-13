@@ -1,47 +1,49 @@
 const statusText = document.getElementById('statusText')
-const pageText = document.getElementById('pageText')
-const modeText = document.getElementById('modeText')
 const countDisplay = document.getElementById('countDisplay')
 const actionBtn = document.getElementById('actionBtn')
 const infoText = document.getElementById('infoText')
 const urlText = document.getElementById('urlText')
+const pageStatus = document.getElementById('pageStatus')
 
 let currentTab = null
-let state = { running: false, cleaned: 0, onPage: false, desktop: false }
+let state = { running: false, cleaned: 0, connected: false }
 
 async function getCurrentTab() {
   let tabs = await chrome.tabs.query({ active: true, currentWindow: true })
   return tabs[0]
 }
 
+async function injectContentScript(tabId) {
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: ['content.js']
+    })
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
 function updateUI() {
   if (state.running) {
     statusText.innerHTML = '<span class="badge ok">Running</span>'
-    actionBtn.textContent = 'Stop'
+    actionBtn.textContent = '■ Stop'
     actionBtn.className = 'btn-stop'
-    actionBtn.disabled = false
     infoText.textContent = 'Cleaning in progress...'
   } else {
     statusText.innerHTML = '<span class="badge info">Idle</span>'
-    actionBtn.textContent = 'Start Cleaning'
+    actionBtn.textContent = '▶ Start Cleaning'
     actionBtn.className = 'btn-start'
-    actionBtn.disabled = !state.onPage
-    infoText.textContent = state.onPage
+    infoText.textContent = state.connected
       ? 'Tap Start to remove likes/reactions.'
-      : 'Go to Facebook Activity Log (Likes and Reactions), then tap Refresh.'
+      : 'Make sure you are on a Facebook page, then tap Refresh.'
   }
-
-  pageText.innerHTML = state.onPage
-    ? '<span class="badge ok">Activity Log Detected</span>'
-    : '<span class="badge warn">Not Activity Log</span>'
-
-  modeText.textContent = state.desktop ? 'Desktop' : 'Mobile'
+  pageStatus.innerHTML = state.connected
+    ? '<span class="badge ok">✓ Connected</span>'
+    : '<span class="badge warn">Not connected — tap Refresh</span>'
   countDisplay.textContent = state.cleaned
-}
-
-function sendToTab(msg) {
-  if (!currentTab) return
-  chrome.tabs.sendMessage(currentTab.id, msg).catch(() => {})
+  actionBtn.disabled = false
 }
 
 function queryStatus() {
@@ -52,27 +54,57 @@ function queryStatus() {
       if (res) {
         state.running = res.running
         state.cleaned = res.cleaned
-        state.onPage = res.onPage
-        state.desktop = res.desktop
+        state.connected = true
         updateUI()
       }
     })
-    .catch(() => {
-      state.running = false
-      state.onPage = false
-      updateUI()
+    .catch(async () => {
+      let injected = await injectContentScript(currentTab.id)
+      if (injected) {
+        setTimeout(() => {
+          chrome.tabs.sendMessage(currentTab.id, { type: 'status' })
+            .then(res => {
+              if (res) {
+                state.running = res.running
+                state.cleaned = res.cleaned
+                state.connected = true
+                updateUI()
+              }
+            })
+            .catch(() => {
+              state.connected = false
+              updateUI()
+            })
+        }, 500)
+      } else {
+        state.connected = false
+        updateUI()
+      }
     })
 }
 
 actionBtn.addEventListener('click', () => {
   if (state.running) {
-    sendToTab({ type: 'stop' })
+    chrome.tabs.sendMessage(currentTab.id, { type: 'stop' }).catch(() => {})
     state.running = false
     updateUI()
   } else {
-    sendToTab({ type: 'start' })
-    state.running = true
-    updateUI()
+    chrome.tabs.sendMessage(currentTab.id, { type: 'start' })
+      .then(res => {
+        if (res?.ok) {
+          state.running = true
+          state.connected = true
+          updateUI()
+        } else {
+          infoText.textContent = res?.error || 'Error starting. Try Refresh.'
+          updateUI()
+        }
+      })
+      .catch(() => {
+        state.connected = false
+        infoText.textContent = 'Could not reach the page. Tap Refresh.'
+        updateUI()
+      })
   }
 })
 
@@ -81,23 +113,29 @@ document.getElementById('refreshBtn').addEventListener('click', () => {
 })
 
 chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.type === 'progress' || msg.type === 'done' || msg.type === 'stopped') {
+  if (msg.type === 'progress') {
     state.cleaned = msg.count || 0
-    if (msg.type === 'done' || msg.type === 'stopped') {
-      state.running = false
-    }
+    updateUI()
+  } else if (msg.type === 'done' || msg.type === 'stopped') {
+    state.cleaned = msg.count || 0
+    state.running = false
+    infoText.textContent = msg.type === 'done'
+      ? '✅ Done! Cleaned ' + state.cleaned + ' reactions.'
+      : '⏸ Stopped. Cleaned ' + state.cleaned + ' reactions.'
     updateUI()
   }
 })
 
 async function init() {
   currentTab = await getCurrentTab()
+  urlText.textContent = currentTab?.url || 'No page detected'
   if (currentTab?.url?.includes('facebook.com')) {
+    infoText.textContent = 'Connecting...'
     queryStatus()
   } else {
-    state.onPage = false
-    urlText.textContent = currentTab?.url || 'No page detected'
+    state.connected = false
     updateUI()
+    infoText.textContent = 'Open Facebook first, then open this popup.'
   }
 }
 
